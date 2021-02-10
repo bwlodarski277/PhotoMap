@@ -82,8 +82,8 @@
         style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="@dimen/general_padding"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingBottom="@dimen/general_padding">
 
         <Button
             android:id="@+id/loginButton"
@@ -93,8 +93,9 @@
             android:layout_marginLeft="@dimen/general_padding"
             android:layout_marginRight="@dimen/general_padding"
             android:layout_weight="1"
+            android:onClick="login"
             android:text="@string/login_text"
-            android:onClick="login"/>
+            android:textSize="@dimen/button_text_size" />
 
         <Button
             android:id="@+id/registerButton"
@@ -104,13 +105,15 @@
             android:layout_marginEnd="@dimen/general_padding"
             android:layout_marginRight="@dimen/general_padding"
             android:layout_weight="1"
+            android:onClick="register"
             android:text="@string/register_text"
-            android:onClick="register"/>
+            android:textSize="@dimen/button_text_size" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/userInfo"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/regular_text_size" />
 
 </LinearLayout>

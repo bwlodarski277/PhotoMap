@@ -29,7 +29,6 @@ public class PhotoAdapter extends ArrayAdapter<Photo> {
 		return super.getCount();
 	}
 
-	@NonNull
 	@Override
 	public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
 //		return super.getView(position, convertView, parent);

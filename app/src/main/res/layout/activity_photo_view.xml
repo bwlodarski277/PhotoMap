@@ -16,7 +16,6 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
             app:popupTheme="@style/Theme.CourseworkApplication.PopupOverlay" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -25,7 +24,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <include layout="@layout/content_photo_view" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/photo_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/addPhoto"

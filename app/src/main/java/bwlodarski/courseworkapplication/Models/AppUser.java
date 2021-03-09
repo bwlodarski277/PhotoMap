@@ -1,4 +1,4 @@
-package bwlodarski.courseworkapplication;
+package bwlodarski.courseworkapplication.Models;
 
 import androidx.annotation.NonNull;
 

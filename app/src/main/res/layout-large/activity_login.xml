@@ -8,7 +8,7 @@
     android:paddingTop="@dimen/general_padding"
     android:paddingRight="@dimen/general_padding"
     android:paddingBottom="@dimen/general_padding"
-    tools:context=".MainActivity">
+    tools:context=".Activities.LoginActivity">
 
     <TextView
         android:layout_width="match_parent"

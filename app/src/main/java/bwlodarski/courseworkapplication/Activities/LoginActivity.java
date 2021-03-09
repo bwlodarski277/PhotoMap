@@ -1,6 +1,7 @@
-package bwlodarski.courseworkapplication;
+package bwlodarski.courseworkapplication.Activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -11,15 +12,22 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+import bwlodarski.courseworkapplication.Models.AppUser;
+import bwlodarski.courseworkapplication.R;
+
+public class LoginActivity extends AppCompatActivity {
 
 	private ArrayList<AppUser> users;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		users = new ArrayList<AppUser>();
+		setContentView(R.layout.activity_login);
+		users = new ArrayList<>();
+
+		Intent photoView = new Intent(getApplicationContext(), PhotoViewActivity.class);
+		startActivity(photoView);
+		finish();
 	}
 
 	public void register(View view) {
@@ -69,15 +77,15 @@ public class MainActivity extends AppCompatActivity {
 
 		String msg;
 		if (found != null) {
-			msg = "Logged in!";
-			TextView info = (TextView) findViewById(R.id.userInfo);
-			info.setText(found.toString());
+			Intent photoView = new Intent(getApplicationContext(), PhotoViewActivity.class);
+			startActivity(photoView);
+			finish();
 		} else {
 			msg = "Invalid login";
+			Context context = getApplicationContext();
+			Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
 		}
 
-		Context context = getApplicationContext();
-		Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
 
 	}
 }

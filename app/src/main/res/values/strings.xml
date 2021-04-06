@@ -19,4 +19,5 @@
     <string name="add_a_photo">Add a photo</string>
     <string name="photo_desc">Photo</string>
     <string name="photo">Photo</string>
+    <string name="add_hint">Press ➕ to add photos.</string>
 </resources>

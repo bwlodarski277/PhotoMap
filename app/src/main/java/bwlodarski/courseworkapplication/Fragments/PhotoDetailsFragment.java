@@ -10,6 +10,9 @@ import androidx.fragment.app.Fragment;
 
 import bwlodarski.courseworkapplication.R;
 
+/**
+ * Responsible for displaying the details of a single photo.
+ */
 public class PhotoDetailsFragment extends Fragment {
 
 	public PhotoDetailsFragment() {}

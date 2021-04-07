@@ -10,6 +10,10 @@ import androidx.fragment.app.Fragment;
 
 import bwlodarski.courseworkapplication.R;
 
+/**
+ * Responsible for displaying both the grid view and the details view
+ * (for different orientations)
+ */
 public class PhotoMultiViewFragment extends Fragment {
 
 	public PhotoMultiViewFragment() {}

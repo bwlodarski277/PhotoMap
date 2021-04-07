@@ -19,14 +19,14 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/grid_fragment"
-        android:name="bwlodarski.courseworkapplication.Activities.PhotoGridFragment"
+        android:name="bwlodarski.courseworkapplication.Fragments.PhotoGridFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/detail_fragment"
-        android:name="bwlodarski.courseworkapplication.Activities.PhotoDetailsFragment"
+        android:name="bwlodarski.courseworkapplication.Fragments.PhotoDetailsFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="2" />

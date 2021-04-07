@@ -8,7 +8,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
@@ -18,14 +18,15 @@
             android:name=".Activities.PhotoViewActivity"
             android:label="@string/title_activity_photo_view"
             android:theme="@style/Theme.CourseworkApplication.NoActionBar" />
-        <activity android:name=".Activities.LoginActivity">
+        <activity android:name=".Activities.LoginActivity" />
+        <activity android:name=".Activities.PhotoDetailsActivity" />
+        <activity android:name=".Activities.AddPhotoActivity" />
+        <activity android:name=".Activities.SplashScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activities.PhotoDetailsActivity" />
     </application>
 
 </manifest>

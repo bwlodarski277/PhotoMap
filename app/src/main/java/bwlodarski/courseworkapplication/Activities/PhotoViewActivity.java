@@ -1,6 +1,7 @@
 package bwlodarski.courseworkapplication.Activities;
 
 import android.Manifest;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -11,9 +12,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.PopupWindow;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,8 +30,6 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-
-import java.io.ByteArrayOutputStream;
 
 import bwlodarski.courseworkapplication.Fragments.PhotoGridFragment;
 import bwlodarski.courseworkapplication.Fragments.PhotoMultiViewFragment;
@@ -47,6 +49,8 @@ public class PhotoViewActivity extends AppCompatActivity {
 
 	private int userId;
 
+	private PopupWindow addPhotoPopup;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(null);
@@ -55,7 +59,7 @@ public class PhotoViewActivity extends AppCompatActivity {
 		// Reading intent to get username
 		Intent intent = getIntent();
 		String username = intent.getStringExtra(UserPrefs.usernameKey);
-		toolbar.setTitle(String.format("%s's photos", username));
+		toolbar.setTitle(String.format("%s's Photos", username));
 		setSupportActionBar(toolbar);
 
 		userId = intent.getIntExtra(UserPrefs.userIdKey, 0);
@@ -65,9 +69,10 @@ public class PhotoViewActivity extends AppCompatActivity {
 
 		setFragment();
 
-		FloatingActionButton fab = findViewById(R.id.addPhoto);
+		FloatingActionButton fab = findViewById(R.id.add_photo);
 
 		fab.setOnClickListener(view -> {
+			/* Original
 			int permission = ContextCompat.checkSelfPermission(
 					view.getContext(), Manifest.permission.CAMERA);
 
@@ -77,7 +82,38 @@ public class PhotoViewActivity extends AppCompatActivity {
 			} else {
 				requestPermission();
 			}
+			 */
+
+			View root = findViewById(R.id.photo_view_root).getRootView();
+
+			LayoutInflater inflater = getLayoutInflater();
+			View popup = inflater.inflate(R.layout.fragment_popup, (ViewGroup) root, false);
+			addPhotoPopup = new PopupWindow(popup,
+					ActionBar.LayoutParams.MATCH_PARENT,
+					ActionBar.LayoutParams.MATCH_PARENT, true);
+
+			addPhotoPopup.setAnimationStyle(R.style.popup_fade_anim);
+
+			addPhotoPopup.showAtLocation(findViewById(R.id.photo_view_root), Gravity.CENTER,
+					ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
 		});
+	}
+
+	public void leavePopup(View view) {
+		addPhotoPopup.dismiss();
+	}
+
+	public void takePicture(View view) {
+		int permission = ContextCompat.checkSelfPermission(
+				view.getContext(), Manifest.permission.CAMERA);
+
+		if (permission == PackageManager.PERMISSION_GRANTED) {
+			Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+			startActivityForResult(cameraIntent, CAMERA_REQUEST);
+		} else {
+			requestPermission();
+		}
+		addPhotoPopup.dismiss();
 	}
 
 	private void setFragment() {
@@ -107,7 +143,7 @@ public class PhotoViewActivity extends AppCompatActivity {
 			if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
 				startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE), CAMERA_REQUEST);
 			else {
-				View view = findViewById(R.id.addPhoto);
+				View view = findViewById(R.id.add_photo);
 				Snackbar.make(view, "Permission not granted", Snackbar.LENGTH_LONG)
 						.setAction("Retry", v -> requestPermission()).show();
 			}
@@ -120,6 +156,7 @@ public class PhotoViewActivity extends AppCompatActivity {
 
 		if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
 			assert data != null;
+			addPhotoPopup.dismiss();
 			Bitmap image = (Bitmap) data.getExtras().get("data");
 			addImage(image);
 		}

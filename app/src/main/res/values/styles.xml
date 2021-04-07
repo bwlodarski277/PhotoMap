@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="popup_fade_anim">
+        <item name="android:windowEnterAnimation">@anim/anim_popup_fade_in</item>
+        <item name="android:windowExitAnimation">@anim/anim_popup_fade_out</item>
+    </style>
+    <style name="popup_zoom_anim">
+        <item name="android:windowEnterAnimation">@anim/anim_popup_zoom_in</item>
+        <item name="android:windowExitAnimation">@anim/anim_popup_zoom_out</item>
+    </style>
+    <style name="splash_screen">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowDisablePreview">true</item>
+    </style>
+</resources>

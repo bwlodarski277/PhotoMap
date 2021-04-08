@@ -1,4 +1,4 @@
-package bwlodarski.courseworkapplication.Fragments;
+package bwlodarski.photoMap.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import bwlodarski.courseworkapplication.R;
+import bwlodarski.photoMap.R;
 
 /**
  * Responsible for displaying the details of a single photo.

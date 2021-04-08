@@ -1,4 +1,4 @@
-package bwlodarski.courseworkapplication;
+package bwlodarski.photoMap;
 
 import android.content.Context;
 

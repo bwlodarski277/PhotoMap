@@ -1,4 +1,4 @@
-package bwlodarski.courseworkapplication;
+package bwlodarski.photoMap;
 
 import org.junit.Test;
 

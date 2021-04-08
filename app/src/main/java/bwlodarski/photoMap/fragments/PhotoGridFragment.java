@@ -1,4 +1,4 @@
-package bwlodarski.courseworkapplication.Fragments;
+package bwlodarski.photoMap.fragments;
 
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,16 +18,15 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.w3c.dom.Text;
-
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Objects;
 
-import bwlodarski.courseworkapplication.Adapters.PhotoAdapter;
-import bwlodarski.courseworkapplication.Helpers.DatabaseHandler;
-import bwlodarski.courseworkapplication.Models.Photo;
-import bwlodarski.courseworkapplication.R;
-import bwlodarski.courseworkapplication.Static.UserPrefs;
+import bwlodarski.photoMap.R;
+import bwlodarski.photoMap.adapters.PhotoAdapter;
+import bwlodarski.photoMap.helpers.DatabaseHandler;
+import bwlodarski.photoMap.helpers.ImageHandler;
+import bwlodarski.photoMap.models.Photo;
+import bwlodarski.photoMap.models.UserPrefs;
 
 public class PhotoGridFragment extends Fragment {
 
@@ -37,7 +35,6 @@ public class PhotoGridFragment extends Fragment {
 	public PhotoAdapter adapter;
 	private RecyclerView recyclerView;
 	private TextView hintText;
-
 	private int userId;
 
 	// Default constructor
@@ -78,22 +75,38 @@ public class PhotoGridFragment extends Fragment {
 		DatabaseHandler handler = new DatabaseHandler(getContext());
 		SQLiteDatabase db = handler.getReadableDatabase();
 
+		// Raw query to get all the photos associated with a user by the user's ID
 		String rawQuery = String.format(
-				"SELECT * FROM %s AS a JOIN %s AS b ON a.%s = b.%s WHERE b.%s = %s",
+				"SELECT * FROM %s AS a JOIN %s AS b ON a.%s = b.%s WHERE b.%s = ?",
 				DatabaseHandler.Photos.TABLE, DatabaseHandler.UserPhotos.TABLE,
 				DatabaseHandler.Photos.KEY, DatabaseHandler.UserPhotos.PHOTO_KEY,
-				DatabaseHandler.UserPhotos.USER_KEY, userId);
+				DatabaseHandler.UserPhotos.USER_KEY);
 
-		try (Cursor cursor = db.rawQuery(rawQuery, null)) {
+		String[] queryParams = {String.valueOf(userId)};
+
+		try (Cursor cursor = db.rawQuery(rawQuery, queryParams)) {
 			if (cursor.moveToFirst()) {
 				do {
 					int idCol = cursor.getColumnIndexOrThrow(DatabaseHandler.Photos.KEY);
 					int photoCol = cursor.getColumnIndexOrThrow(DatabaseHandler.Photos.PHOTO);
 
 					int id = cursor.getInt(idCol);
-					String photo = cursor.getString(photoCol);
+					String photoPath = cursor.getString(photoCol);
 
-					photos.add(new Photo(id, photo));
+					byte[] photo = null;
+					try {
+						ImageHandler.FileReturn data = ImageHandler.readFromFile(photoPath);
+						if (data.getBytesRead() == -1) Log.e(TAG, "No bytes read from file.");
+
+						photo = data.getPhoto();
+					} catch (IOException exception) {
+						Toast.makeText(getContext(),
+								"There was an error when reading photos.",
+								Toast.LENGTH_LONG).show();
+						Log.e(TAG, exception.toString());
+					}
+
+					photos.add(new Photo(id, photo, photoPath));
 				} while (cursor.moveToNext());
 			}
 		} catch (SQLException exception) {
@@ -105,8 +118,7 @@ public class PhotoGridFragment extends Fragment {
 		if (photos.size() == 0) {
 			recyclerView.setVisibility(View.GONE);
 			hintText.setVisibility(View.VISIBLE);
-		}
-		else {
+		} else {
 			// Otherwise, fill the photo adapter and set the recycler view adapter
 			adapter = new PhotoAdapter(getContext(), photos, db, handler);
 			recyclerView.setAdapter(adapter);

@@ -1,4 +1,4 @@
-package bwlodarski.courseworkapplication.Activities;
+package bwlodarski.photoMap.activities;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -15,20 +15,21 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import bwlodarski.courseworkapplication.Helpers.DatabaseHandler;
-import bwlodarski.courseworkapplication.R;
-import bwlodarski.courseworkapplication.Static.UserPrefs;
+import bwlodarski.photoMap.R;
+import bwlodarski.photoMap.helpers.DatabaseHandler;
+import bwlodarski.photoMap.models.UserPrefs;
 
+/**
+ * Login Activity.
+ * Allows users to log in or be taken to the registration screen.
+ * Interacts with the database (Users table)
+ *
+ * @see DatabaseHandler
+ */
 public class LoginActivity extends AppCompatActivity {
 
-//	private static final String USER_PREF_FILE = "USER";
-//	private static final String USER_ID = "ID_KEY";
-//	private static final String USERNAME = "NAME_KEY";
-
 	private static final String TAG = "LoginActivity";
-
 	private EditText usernameEditText, passwordEditText;
-
 	private SharedPreferences preferences;
 
 	@Override
@@ -113,21 +114,6 @@ public class LoginActivity extends AppCompatActivity {
 					Toast.LENGTH_LONG).show();
 			Log.e(TAG, exception.toString());
 		}
-
-//		// Checking if the username is already taken
-//		for (AppUser user : users) {
-//			if (user.getUsername().equals(username)) {
-//				String msg = "This username is taken";
-//				Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-//				return;
-//			}
-//		}
-//
-//		AppUser user = new AppUser(username, password);
-//		users.add(user);
-//
-//		String msg = "Account created!";
-//		Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
 	}
 
 	/**
@@ -190,27 +176,5 @@ public class LoginActivity extends AppCompatActivity {
 					Toast.LENGTH_LONG).show();
 			Log.e(TAG, exception.toString());
 		}
-
-//		AppUser found = null;
-//		for (AppUser user : users) {
-//			assert user.getUsername() != null && user.getPassword() != null;
-//			if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
-//				found = user;
-//				break;
-//			}
-//		}
-//
-//		String msg;
-//		if (found != null) {
-//			Intent photoView = new Intent(getApplicationContext(), PhotoViewActivity.class);
-//			startActivity(photoView);
-//			finish();
-//		} else {
-//			msg = "Invalid login";
-//			Context context = getApplicationContext();
-//			Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-//		}
-
-
 	}
 }

@@ -1,4 +1,4 @@
-package bwlodarski.courseworkapplication.Static;
+package bwlodarski.photoMap.models;
 
 /**
  * Shared Preferences names class

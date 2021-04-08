@@ -1,4 +1,4 @@
-package bwlodarski.courseworkapplication.Helpers;
+package bwlodarski.photoMap.helpers;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -140,7 +140,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		private static final String CREATE_PHOTOS =
 				"CREATE TABLE " + TABLE + " (" +
 						KEY + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-						PHOTO + " TEXT);";
+						PHOTO + " BLOB);";
 	}
 
 	/**

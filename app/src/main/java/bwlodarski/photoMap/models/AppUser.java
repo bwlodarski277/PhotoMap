@@ -1,4 +1,4 @@
-package bwlodarski.courseworkapplication.Models;
+package bwlodarski.photoMap.models;
 
 import androidx.annotation.NonNull;
 

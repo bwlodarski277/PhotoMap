@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="bwlodarski.courseworkapplication">
+    package="bwlodarski.photoMap">
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" />
 
@@ -15,13 +16,12 @@
         android:theme="@style/Theme.CourseworkApplication"
         tools:ignore="AllowBackup">
         <activity
-            android:name=".Activities.PhotoViewActivity"
+            android:name="bwlodarski.photoMap.activities.PhotoViewActivity"
             android:label="@string/title_activity_photo_view"
             android:theme="@style/Theme.CourseworkApplication.NoActionBar" />
-        <activity android:name=".Activities.LoginActivity" />
-        <activity android:name=".Activities.PhotoDetailsActivity" />
-        <activity android:name=".Activities.AddPhotoActivity" />
-        <activity android:name=".Activities.SplashScreenActivity">
+        <activity android:name="bwlodarski.photoMap.activities.LoginActivity" />
+        <activity android:name="bwlodarski.photoMap.activities.PhotoDetailsActivity" />
+        <activity android:name="bwlodarski.photoMap.activities.SplashScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

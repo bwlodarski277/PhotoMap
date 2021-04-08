@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Coursework Application</string>
+    <string name="app_name">PhotoMap</string>
     <string name="username_label">Username</string>
     <string name="password_label">Password</string>
     <string name="username_hint">username</string>
@@ -26,5 +26,5 @@
     <string name="take_a_photo">Take a photo</string>
     <string name="add_a_photo_title">Add a Photo…</string>
     <string name="app_logo">App logo</string>
-    <string name="splash_app_name">PhotoMap</string>
+    <string name="splash_app_name">@string/app_name</string>
 </resources>

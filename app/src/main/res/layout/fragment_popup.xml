@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#8000"
+    android:onClick="leavePopup"
     android:orientation="vertical"
     android:padding="@dimen/general_padding"
-    android:background="#8000"
-    tools:context=".Activities.PhotoViewActivity"
-    android:onClick="leavePopup"
-    android:soundEffectsEnabled="false">
+    android:soundEffectsEnabled="false"
+    tools:context=".activities.PhotoViewActivity">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -71,6 +70,7 @@
                 <com.google.android.material.button.MaterialButton
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:onClick="selectPicture"
                     android:text="@string/select_photo_from_device"
                     app:icon="@drawable/select_photo" />
             </LinearLayout>

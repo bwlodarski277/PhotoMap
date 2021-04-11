@@ -1,6 +1,6 @@
 package bwlodarski.photoMap.activities;
 
-import android.content.ContentValues;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,7 +13,13 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.autofill.HintConstants;
+
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import bwlodarski.photoMap.R;
 import bwlodarski.photoMap.helpers.DatabaseHandler;
@@ -28,16 +34,20 @@ import bwlodarski.photoMap.models.UserPrefs;
  */
 public class LoginActivity extends AppCompatActivity {
 
+	public static final int minUserLength = 6;
+	public static final int minPassLength = 8;
+	public static final int REGISTER = 123;
 	private static final String TAG = "LoginActivity";
-	private EditText usernameEditText, passwordEditText;
+	private EditText emailEditText, passwordEditText;
 	private SharedPreferences preferences;
+	private FirebaseAuth auth;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
 
-		usernameEditText = findViewById(R.id.username);
+		emailEditText = findViewById(R.id.email);
 		passwordEditText = findViewById(R.id.password);
 
 		// Reading shared preferences
@@ -46,6 +56,14 @@ public class LoginActivity extends AppCompatActivity {
 		// If the user is logged in, skip the login screen.
 		if (preferences.contains(UserPrefs.userIdKey) &&
 				preferences.contains(UserPrefs.usernameKey)) {
+			sendToPhotoView();
+		}
+
+		FirebaseApp.initializeApp(this);
+		auth = FirebaseAuth.getInstance();
+
+		FirebaseUser user = auth.getCurrentUser();
+		if (user != null) {
 			sendToPhotoView();
 		}
 	}
@@ -72,47 +90,26 @@ public class LoginActivity extends AppCompatActivity {
 	 * @param view view to read data from (login screen)
 	 */
 	public void register(View view) {
-		String username = usernameEditText.getText().toString();
-		String password = passwordEditText.getText().toString();
+		String email = emailEditText.getText().toString();
 
-		Context context = getApplicationContext();
+		Intent registerIntent = new Intent(view.getContext(), RegisterActivity.class);
+		registerIntent.putExtra("EMAIL", email);
+		startActivityForResult(registerIntent, REGISTER);
+	}
 
-		// Checking the username and password length
-		if (username.length() < 8 || password.length() < 8) {
-			String msg = "Username and password must be at least 8 characters long.";
-			Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
-			return;
-		}
-
-		DatabaseHandler handler = new DatabaseHandler(this);
-		SQLiteDatabase db = handler.getWritableDatabase();
-
-		String[] cols = {DatabaseHandler.Users.KEY};
-		String selection = String.format("%s = ?", DatabaseHandler.Users.USERNAME);
-		String[] args = {username};
-
-		// Selecting user IDs where username and password match
-		try (Cursor cursor = db.query(DatabaseHandler.Users.TABLE, cols, selection, args,
-				null, null, null)) {
-			if (!cursor.moveToFirst()) {
-				// The username was not found in the database, so create the new user.
-				ContentValues userData = new ContentValues();
-				userData.put(DatabaseHandler.Users.USERNAME, username);
-				userData.put(DatabaseHandler.Users.PASSWORD, password);
-
-				// Adding the new user to the DB
-				db.insertOrThrow(DatabaseHandler.Users.TABLE, null, userData);
-
-				Toast.makeText(this, "Account created!", Toast.LENGTH_SHORT).show();
-
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode == Activity.RESULT_OK) {
+			if (requestCode == REGISTER) {
+				assert data != null;
+				emailEditText.setText(data.getStringExtra("EMAIL"));
+				passwordEditText.setText(data.getStringExtra("PASS"));
 			} else {
-				Toast.makeText(this, "This username is taken.",
+				Log.e(TAG, "Unknown request code");
+				Toast.makeText(getBaseContext(), "Something went wrong!",
 						Toast.LENGTH_SHORT).show();
 			}
-		} catch (SQLException exception) {
-			Toast.makeText(this, "There was an error when registering.",
-					Toast.LENGTH_LONG).show();
-			Log.e(TAG, exception.toString());
 		}
 	}
 
@@ -122,28 +119,58 @@ public class LoginActivity extends AppCompatActivity {
 	 * @param view view to read data from (login screen)
 	 */
 	public void login(View view) {
-		String username = usernameEditText.getText().toString();
+		String email = emailEditText.getText().toString();
 		String password = passwordEditText.getText().toString();
 
 		Context context = getApplicationContext();
-		// Checking the username and password length
-		if (username.length() < 8 || password.length() < 8) {
-			String msg = "Username and password must be at least 8 characters long.";
+
+		// Checking the email and password length
+		if (email.length() < minUserLength) {
+			String msg = String.format("Username needs to be at least %s long.", minUserLength);
 			Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
 			return;
 		}
 
+		if (password.length() < minPassLength) {
+			String msg = String.format("Password needs to be at least %s long.", minPassLength);
+			Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+			return;
+		}
+
+		auth.signInWithEmailAndPassword(email, password)
+				.addOnCompleteListener(task -> {
+					if (task.isSuccessful()) {
+						FirebaseUser user = auth.getCurrentUser();
+						assert user != null;
+						if (user.isEmailVerified()) {
+							getUserData(email);
+							sendToPhotoView();
+						} else {
+							user.sendEmailVerification();
+							Toast.makeText(
+									getBaseContext(),
+									"You need to authenticate your email. Check your inbox.",
+									Toast.LENGTH_LONG)
+									.show();
+						}
+
+					} else {
+						Toast.makeText(view.getContext(), "Email or password invalid",
+								Toast.LENGTH_SHORT).show();
+						Log.w(TAG, "Invalid username or password");
+					}
+				});
+	}
+
+	private void getUserData(String email) {
 		DatabaseHandler handler = new DatabaseHandler(this);
 		SQLiteDatabase db = handler.getWritableDatabase();
 
-		// Finding user where username and password match
-		String selection = String.format(
-				"%s = ? AND %s = ?",
-				DatabaseHandler.Users.USERNAME,
-				DatabaseHandler.Users.PASSWORD);
+		// Finding user where email and password match
+		String selection = String.format("%s = ?", DatabaseHandler.Users.EMAIL);
 
 //		// Arguments to use in the selection
-		String[] args = {username, password};
+		String[] args = {email};
 
 		try (Cursor cursor = db.query(DatabaseHandler.Users.TABLE, null, selection,
 				args, null, null, null)) {
@@ -154,11 +181,11 @@ public class LoginActivity extends AppCompatActivity {
 				int usernameCol = cursor.getColumnIndex(DatabaseHandler.Users.USERNAME);
 
 				int id = cursor.getInt(idCol);
-				String _username = cursor.getString(usernameCol); // _ as the name is in use
+				String username = cursor.getString(usernameCol);
 
 				SharedPreferences.Editor editor = preferences.edit();
 				editor.putInt(UserPrefs.userIdKey, id);
-				editor.putString(UserPrefs.usernameKey, _username);
+				editor.putString(UserPrefs.usernameKey, username);
 				editor.apply();
 
 				Toast.makeText(this, "Successfully logged in!",
@@ -166,7 +193,7 @@ public class LoginActivity extends AppCompatActivity {
 
 				sendToPhotoView();
 			} else {
-				// This occurs when the username and password don't match
+				// This occurs when the email and password don't match
 				// (We check the password in the query, so this will be empty if not matched)
 				Toast.makeText(this, "Username or password incorrect.",
 						Toast.LENGTH_LONG).show();
@@ -176,5 +203,23 @@ public class LoginActivity extends AppCompatActivity {
 					Toast.LENGTH_LONG).show();
 			Log.e(TAG, exception.toString());
 		}
+	}
+
+	public void resetPassword(View view) {
+		String email = emailEditText.getText().toString();
+		auth.sendPasswordResetEmail(email)
+				.addOnCompleteListener(task -> {
+					if (task.isSuccessful()) {
+						Toast.makeText(getApplicationContext(),
+								"A password reset link has been sent to your email.",
+								Toast.LENGTH_LONG).show();
+					} else {
+						Toast.makeText(getApplicationContext(),
+								"Could not send password reset email. " +
+										"Double-check your email address.",
+								Toast.LENGTH_LONG).show();
+						Log.w(TAG, "Password was not reset.");
+					}
+				});
 	}
 }

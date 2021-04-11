@@ -75,11 +75,11 @@
                     app:icon="@drawable/select_photo" />
             </LinearLayout>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/requires_storage_permission"
-                android:textAppearance="@android:style/TextAppearance.Small" />
+<!--            <TextView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="@string/requires_storage_permission"-->
+<!--                android:textAppearance="@android:style/TextAppearance.Small" />-->
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

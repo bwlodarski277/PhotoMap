@@ -17,6 +17,8 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
@@ -32,6 +34,8 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -53,21 +57,36 @@ public class PhotoViewActivity extends AppCompatActivity {
 	private static final int STORAGE_PERMISSION = 33;
 	private static final int TAKE_PICTURE = 222;
 	private static final int SELECT_PICTURE = 333;
+	private static final int GET_LOCATION = 444;
 
 	private static final String TAG = "PhotoViewActivity";
+	FirebaseUser user;
 	private SQLiteDatabase db;
 	private int userId;
+	private String username;
 	private PopupWindow addPhotoPopup;
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		// Making sure we re-render if any settings are changed
+		setFragment();
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(null);
 		setContentView(R.layout.activity_photo_view);
 		Toolbar toolbar = findViewById(R.id.toolbar);
+
+		FirebaseAuth auth = FirebaseAuth.getInstance();
+		user = auth.getCurrentUser();
+
 		// Reading intent to get username
 		Intent intent = getIntent();
-		String username = intent.getStringExtra(UserPrefs.usernameKey);
+		username = intent.getStringExtra(UserPrefs.usernameKey);
 		toolbar.setTitle(String.format("%s's Photos", username));
+		toolbar.setSubtitle("All photos");
 		setSupportActionBar(toolbar);
 
 		userId = intent.getIntExtra(UserPrefs.userIdKey, 0);
@@ -80,18 +99,6 @@ public class PhotoViewActivity extends AppCompatActivity {
 		FloatingActionButton fab = findViewById(R.id.add_photo);
 
 		fab.setOnClickListener(view -> {
-			/* Original
-			int permission = ContextCompat.checkSelfPermission(
-					view.getContext(), Manifest.permission.CAMERA);
-
-			if (permission == PackageManager.PERMISSION_GRANTED) {
-				Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-				startActivityForResult(cameraIntent, CAMERA_REQUEST);
-			} else {
-				requestPermission();
-			}
-			 */
-
 			View root = findViewById(R.id.photo_view_root).getRootView();
 
 			LayoutInflater inflater = getLayoutInflater();
@@ -132,11 +139,12 @@ public class PhotoViewActivity extends AppCompatActivity {
 		int permission = ContextCompat.checkSelfPermission(
 				view.getContext(), Manifest.permission.READ_EXTERNAL_STORAGE);
 
-		if (permission == PackageManager.PERMISSION_GRANTED) {
-			_selectPicture();
-		} else {
-			requestStoragePerm();
-		}
+//		if (permission == PackageManager.PERMISSION_GRANTED) {
+//			_selectPicture();
+//		} else {
+//			requestStoragePerm();
+//		}
+		_selectPicture();
 	}
 
 	private void _selectPicture() {
@@ -178,35 +186,41 @@ public class PhotoViewActivity extends AppCompatActivity {
 	                                       @NonNull String[] permissions,
 	                                       @NonNull int[] grantResults) {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//		if (requestCode == CAMERA_PERMISSION) {
-//			if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-//				_takePicture();
-//			else {
-//				View view = findViewById(R.id.add_photo);
-//				Snackbar.make(view, "Permission not granted", Snackbar.LENGTH_LONG)
-//						.setAction("Retry", v -> requestCameraPerm()).show();
-//			}
-//		}
-		switch (requestCode) {
-			case CAMERA_PERMISSION:
-				if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-					_takePicture();
-				else {
-					View view = findViewById(R.id.add_photo);
-					Snackbar.make(view, "Permission not granted", Snackbar.LENGTH_LONG)
-							.setAction("Retry", v -> requestCameraPerm()).show();
-				}
-				break;
-			case STORAGE_PERMISSION:
-				if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-					_selectPicture();
-				else {
-					View view = findViewById(R.id.add_photo);
-					Snackbar.make(view, "Permission not granted", Snackbar.LENGTH_LONG)
-							.setAction("Retry", v -> requestCameraPerm()).show();
-				}
-				break;
+		if (requestCode == CAMERA_PERMISSION) {
+			if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+				_takePicture();
+			else {
+				View view = findViewById(R.id.add_photo);
+				Snackbar.make(view, "Permission not granted", Snackbar.LENGTH_LONG)
+						.setAction("Retry", v -> requestCameraPerm()).show();
+			}
 		}
+		addPhotoPopup.dismiss();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.menu_photo_grid, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+		int itemId = item.getItemId();
+		if (itemId == R.id.menu_map_button) {
+			Intent photoMapIntent = new Intent(this, PhotoMapActivity.class);
+			photoMapIntent.putExtra(UserPrefs.usernameKey, username);
+			photoMapIntent.putExtra(UserPrefs.userIdKey, userId);
+			startActivity(photoMapIntent);
+			finish();
+		} else if (itemId == R.id.menu_settings) {
+			Intent settingsIntent = new Intent(this, SettingsActivity.class);
+			startActivity(settingsIntent);
+		} else {
+			Log.e(TAG, "Invalid menu item selected");
+			return false;
+		}
+		return true;
 	}
 
 	@Override
@@ -216,9 +230,15 @@ public class PhotoViewActivity extends AppCompatActivity {
 		// Reading the photo taken by the user and adding the image to the DB.
 		if (resultCode == Activity.RESULT_OK) {
 			assert data != null;
+			Intent locationIntent;
 			switch (requestCode) {
 				case TAKE_PICTURE:
 					Bitmap photoTaken = (Bitmap) data.getExtras().get("data");
+
+					locationIntent = new Intent(
+							this, LocationSelectionActivity.class);
+					startActivityForResult(locationIntent, GET_LOCATION);
+
 					addImage(photoTaken);
 					break;
 				case SELECT_PICTURE:
@@ -228,6 +248,11 @@ public class PhotoViewActivity extends AppCompatActivity {
 					try {
 						stream = getContentResolver().openInputStream(imageUri);
 						Bitmap imageFromGallery = BitmapFactory.decodeStream(stream);
+
+						locationIntent = new Intent(
+								this, LocationSelectionActivity.class);
+						startActivityForResult(locationIntent, GET_LOCATION);
+
 						addImage(imageFromGallery);
 					} catch (FileNotFoundException exception) {
 						Toast.makeText(this,
@@ -235,7 +260,7 @@ public class PhotoViewActivity extends AppCompatActivity {
 								Toast.LENGTH_LONG).show();
 						Log.e(TAG, exception.toString());
 					}
-
+					break;
 			}
 		}
 //		if (requestCode == TAKE_PICTURE && resultCode == Activity.RESULT_OK) {

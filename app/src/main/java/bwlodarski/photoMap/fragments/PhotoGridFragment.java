@@ -1,7 +1,8 @@
 package bwlodarski.photoMap.fragments;
 
+import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -20,12 +21,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import bwlodarski.photoMap.R;
 import bwlodarski.photoMap.adapters.PhotoAdapter;
 import bwlodarski.photoMap.helpers.DatabaseHandler;
 import bwlodarski.photoMap.helpers.ImageHandler;
 import bwlodarski.photoMap.models.Photo;
+import bwlodarski.photoMap.models.SettingsPrefs;
 import bwlodarski.photoMap.models.UserPrefs;
 
 public class PhotoGridFragment extends Fragment {
@@ -66,10 +69,14 @@ public class PhotoGridFragment extends Fragment {
 	 */
 	private void fillGrid() {
 		int orientation = getResources().getConfiguration().orientation;
-		int columns;
-		// Changing the number of columns depending on the orientation
-		if (orientation == Configuration.ORIENTATION_PORTRAIT) columns = 3;
-		else columns = 2;
+
+		SharedPreferences settings = requireActivity()
+				.getSharedPreferences(SettingsPrefs.settingsPrefFile, Context.MODE_PRIVATE);
+		int columns = settings.getInt("COLS", 3);
+
+//		// Changing the number of columns depending on the orientation
+//		if (orientation == Configuration.ORIENTATION_PORTRAIT) columns = 3;
+//		else columns = 2;
 		recyclerView.setLayoutManager(new GridLayoutManager(getContext(), columns));
 
 		DatabaseHandler handler = new DatabaseHandler(getContext());

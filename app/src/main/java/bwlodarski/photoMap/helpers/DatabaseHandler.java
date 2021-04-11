@@ -98,23 +98,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		 */
 		public static final String USERNAME = "username";
 		/**
-		 * Password column
+		 * Email column
 		 */
-		public static final String PASSWORD = "password";
+		public static final String EMAIL = "email";
 
 		/**
 		 * All the columns in this table.
 		 */
-		public static final String[] ALL = {KEY, USERNAME, PASSWORD};
+		public static final String[] ALL = {KEY, USERNAME, EMAIL};
 
 		/**
 		 * User table creation SQL.
 		 */
 		private static final String CREATE_USERS =
 				"CREATE TABLE " + TABLE + " (" +
-						KEY + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-						USERNAME + " TEXT UNIQUE NOT NULL," +
-						PASSWORD + " TEXT NOT NULL);";
+						KEY + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+						EMAIL + " TEXT UNIQUE NOT NULL, " +
+						USERNAME + " TEXT NOT NULL);";
 	}
 
 	/**

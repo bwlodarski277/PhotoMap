@@ -48,4 +48,6 @@
     <string name="sample_lon_lat">0.00, 0.00</string>
     <string name="update_address">update address</string>
     <string name="get_location">get location</string>
+    <string name="address">Address</string>
+    <string name="address_hint">address</string>
 </resources>

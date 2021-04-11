@@ -12,4 +12,5 @@
     <color name="primary_variant">#0B92DA</color>
     <color name="secondary">#0BA9CD</color>
     <color name="secondary_variant">#5BE2C5</color>
+    <color name="delete">#f44336</color>
 </resources>

@@ -1,12 +1,15 @@
 package bwlodarski.photoMap.activities;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.icu.number.Precision;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.text.Editable;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -29,7 +32,6 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.IOException;
-import java.util.List;
 
 import bwlodarski.photoMap.BuildConfig;
 import bwlodarski.photoMap.R;
@@ -38,10 +40,10 @@ public class LocationSelectionActivity extends AppCompatActivity implements OnMa
 
 	private static final int LOCATION_PERMISSION = 555;
 	private static final int DEFAULT_ZOOM = 15;
-	MaterialButton locationButton;
-	FusedLocationProviderClient client;
-	TextInputEditText addressInput;
-	Geocoder geocoder;
+	private static final String TAG = "LocationSelectActivity";
+	private FusedLocationProviderClient client;
+	private TextInputEditText addressInput;
+	private Geocoder geocoder;
 	private TextView latLongView;
 	private GoogleMap map;
 	private Marker selectionMarker;
@@ -51,9 +53,11 @@ public class LocationSelectionActivity extends AppCompatActivity implements OnMa
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_location_selection);
 
-		locationButton = findViewById(R.id.gps);
+		MaterialButton locationButton = findViewById(R.id.gps);
+		MaterialButton updateButton = findViewById(R.id.update_address);
 		addressInput = findViewById(R.id.address);
 		latLongView = findViewById(R.id.lat_long_view);
+
 
 		Places.initialize(getApplicationContext(), BuildConfig.MAPS_API_KEY);
 		Places.createClient(this);
@@ -70,6 +74,44 @@ public class LocationSelectionActivity extends AppCompatActivity implements OnMa
 		mapFragment.getMapAsync(this);
 
 		locationButton.setOnClickListener(v -> requestLocationPerm());
+
+		updateButton.setOnClickListener(v -> {
+			if (map != null && client != null) {
+				try {
+					Editable addressEditable = addressInput.getText();
+					if (addressEditable != null) {
+						String addressString = addressEditable.toString();
+						Address address = geocoder.getFromLocationName(addressString, 1).get(0);
+						if (address != null) {
+							LatLng newPos = new LatLng(address.getLatitude(), address.getLongitude());
+							selectionMarker.setPosition(newPos);
+							updateAddress();
+							map.moveCamera(CameraUpdateFactory.newLatLngZoom(newPos, DEFAULT_ZOOM));
+						}
+					}
+				} catch (IOException exception) {
+					Log.e(TAG, exception.toString());
+				}
+			}
+		});
+
+		MaterialButton finishButton = findViewById(R.id.set_location);
+		finishButton.setOnClickListener(v -> {
+			// Getting ID passed to this activity
+			Intent previous = getIntent();
+			long photoId = previous.getLongExtra("ID", -1);
+			// Creating new Intent
+			Intent photoView = new Intent(getApplicationContext(), PhotoViewActivity.class);
+			photoView.putExtra("ID", photoId);
+			// Putting LatLng into bundle
+			LatLng finalLoc = selectionMarker.getPosition();
+			Bundle bundle = new Bundle();
+			bundle.putParcelable("LatLng", finalLoc);
+			// Putting bundle into Intent and finishing this activity
+			photoView.putExtra("LatLng", bundle);
+			setResult(Activity.RESULT_OK, photoView);
+			finish();
+		});
 	}
 
 	private void requestLocationPerm() {
@@ -102,9 +144,7 @@ public class LocationSelectionActivity extends AppCompatActivity implements OnMa
 	}
 
 	@Override
-	public void onRequestPermissionsResult(int requestCode,
-	                                       @NonNull String[] permissions,
-	                                       @NonNull int[] grantResults) {
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 		if (requestCode == LOCATION_PERMISSION) {
 			if (grantResults[0] == PackageManager.PERMISSION_GRANTED

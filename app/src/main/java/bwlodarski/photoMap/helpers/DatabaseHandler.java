@@ -103,18 +103,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		public static final String EMAIL = "email";
 
 		/**
-		 * All the columns in this table.
-		 */
-		public static final String[] ALL = {KEY, USERNAME, EMAIL};
-
-		/**
 		 * User table creation SQL.
 		 */
 		private static final String CREATE_USERS =
-				"CREATE TABLE " + TABLE + " (" +
-						KEY + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-						EMAIL + " TEXT UNIQUE NOT NULL, " +
-						USERNAME + " TEXT NOT NULL);";
+				String.format(
+						"CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
+								"%s TEXT UNIQUE NOT NULL, %s TEXT NOT NULL);",
+						TABLE, KEY, EMAIL, USERNAME);
 	}
 
 	/**
@@ -135,12 +130,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		public static final String PHOTO = "photo";
 
 		/**
+		 * Latitude of photo
+		 */
+		public static final String LAT = "lat";
+
+		/**
+		 * Longitude of photo
+		 */
+		public static final String LON = "lon";
+
+		/**
 		 * Photo table creation SQL.
 		 */
 		private static final String CREATE_PHOTOS =
-				"CREATE TABLE " + TABLE + " (" +
-						KEY + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-						PHOTO + " BLOB);";
+				String.format(
+						"CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
+								"%s BLOB, %s REAL, %s REAL);",
+						TABLE, KEY, PHOTO, LAT, LON);
 	}
 
 	/**
@@ -164,11 +170,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		 * UserPhoto table creation SQL.
 		 */
 		private static final String CREATE_LINK =
-				"CREATE TABLE " + TABLE + " (" +
-						USER_KEY + " INT NOT NULL," +
-						PHOTO_KEY + " INT NOT NULL," +
-						"FOREIGN KEY (" + USER_KEY + ") REFERENCES users(" + Users.KEY + ")," +
-						"FOREIGN KEY (" + PHOTO_KEY + ") REFERENCES photos(" + Photos.KEY + ")," +
-						"PRIMARY KEY (" + USER_KEY + ", " + PHOTO_KEY + "));";
+				String.format("CREATE TABLE %s (%s INT NOT NULL, %s INT NOT NULL,FOREIGN KEY (%s) " +
+								"REFERENCES users(%s), FOREIGN KEY (%s) REFERENCES photos(%s), " +
+								"PRIMARY KEY (%s, %s));",
+						TABLE, USER_KEY, PHOTO_KEY, USER_KEY, Users.KEY,
+						PHOTO_KEY, Photos.KEY, USER_KEY, PHOTO_KEY);
 	}
 }

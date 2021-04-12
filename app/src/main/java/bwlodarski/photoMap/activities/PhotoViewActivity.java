@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -32,6 +31,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -46,7 +46,6 @@ import java.util.UUID;
 
 import bwlodarski.photoMap.R;
 import bwlodarski.photoMap.fragments.PhotoGridFragment;
-import bwlodarski.photoMap.fragments.PhotoMultiViewFragment;
 import bwlodarski.photoMap.helpers.DatabaseHandler;
 import bwlodarski.photoMap.helpers.ImageHandler;
 import bwlodarski.photoMap.models.UserPrefs;
@@ -54,7 +53,6 @@ import bwlodarski.photoMap.models.UserPrefs;
 public class PhotoViewActivity extends AppCompatActivity {
 
 	private static final int CAMERA_PERMISSION = 22;
-	private static final int STORAGE_PERMISSION = 33;
 	private static final int TAKE_PICTURE = 222;
 	private static final int SELECT_PICTURE = 333;
 	private static final int GET_LOCATION = 444;
@@ -136,14 +134,6 @@ public class PhotoViewActivity extends AppCompatActivity {
 	}
 
 	public void selectPicture(View view) {
-		int permission = ContextCompat.checkSelfPermission(
-				view.getContext(), Manifest.permission.READ_EXTERNAL_STORAGE);
-
-//		if (permission == PackageManager.PERMISSION_GRANTED) {
-//			_selectPicture();
-//		} else {
-//			requestStoragePerm();
-//		}
 		_selectPicture();
 	}
 
@@ -155,13 +145,14 @@ public class PhotoViewActivity extends AppCompatActivity {
 	}
 
 	private void setFragment() {
-		Fragment photoViewFragment;
-		int orientation = getResources().getConfiguration().orientation;
-		if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-			photoViewFragment = new PhotoGridFragment();
-		} else {
-			photoViewFragment = new PhotoMultiViewFragment();
-		}
+//		Fragment photoViewFragment;
+		Fragment photoViewFragment = new PhotoGridFragment();
+//		int orientation = getResources().getConfiguration().orientation;
+//		if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+//			photoViewFragment = new PhotoGridFragment();
+//		} else {
+//			photoViewFragment = new PhotoMultiViewFragment();
+//		}
 		// Replacing `photo_view` with the photo grid fragment
 		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.photo_view, photoViewFragment).commit();
@@ -170,11 +161,6 @@ public class PhotoViewActivity extends AppCompatActivity {
 	public void requestCameraPerm() {
 		String[] permissions = {Manifest.permission.CAMERA};
 		ActivityCompat.requestPermissions(this, permissions, CAMERA_PERMISSION);
-	}
-
-	public void requestStoragePerm() {
-		String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE};
-		ActivityCompat.requestPermissions(this, permissions, STORAGE_PERMISSION);
 	}
 
 	/**
@@ -234,12 +220,13 @@ public class PhotoViewActivity extends AppCompatActivity {
 			switch (requestCode) {
 				case TAKE_PICTURE:
 					Bitmap photoTaken = (Bitmap) data.getExtras().get("data");
+					long photoId = addImage(photoTaken);
 
 					locationIntent = new Intent(
 							this, LocationSelectionActivity.class);
+					locationIntent.putExtra("ID", photoId);
 					startActivityForResult(locationIntent, GET_LOCATION);
 
-					addImage(photoTaken);
 					break;
 				case SELECT_PICTURE:
 
@@ -248,35 +235,51 @@ public class PhotoViewActivity extends AppCompatActivity {
 					try {
 						stream = getContentResolver().openInputStream(imageUri);
 						Bitmap imageFromGallery = BitmapFactory.decodeStream(stream);
+						long imageId = addImage(imageFromGallery);
 
 						locationIntent = new Intent(
 								this, LocationSelectionActivity.class);
+						locationIntent.putExtra("ID", imageId);
 						startActivityForResult(locationIntent, GET_LOCATION);
 
-						addImage(imageFromGallery);
 					} catch (FileNotFoundException exception) {
-						Toast.makeText(this,
+						Toast.makeText(getApplicationContext(),
 								"There was an error with storing the image.",
 								Toast.LENGTH_LONG).show();
 						Log.e(TAG, exception.toString());
 					}
 					break;
+				case GET_LOCATION:
+					Bundle bundle = data.getBundleExtra("LatLng");
+					LatLng newLoc = bundle.getParcelable("LatLng");
+					long photo = data.getLongExtra("ID", -1);
+					setPhotoLoc(photo, newLoc);
 			}
 		}
-//		if (requestCode == TAKE_PICTURE && resultCode == Activity.RESULT_OK) {
-//			assert data != null;
-//			addPhotoPopup.dismiss();
-//			Bitmap image = (Bitmap) data.getExtras().get("data");
-//			addImage(image);
-//		}
+	}
+
+	private void setPhotoLoc(long photoId, LatLng loc) {
+		String where = String.format("%s = ?", DatabaseHandler.Photos.KEY);
+		String[] whereArgs = {String.valueOf(photoId)};
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DatabaseHandler.Photos.LAT, loc.latitude);
+		contentValues.put(DatabaseHandler.Photos.LON, loc.longitude);
+		try {
+			db.update(DatabaseHandler.Photos.TABLE, contentValues, where, whereArgs);
+		} catch (SQLException exception) {
+			Log.e(TAG, exception.toString());
+			Toast.makeText(this, "There was an error when setting photo location.",
+					Toast.LENGTH_LONG).show();
+		}
 	}
 
 	/**
 	 * Adds a new photo to the database.
 	 *
 	 * @param image bitmap version of the image to insert into the database.
+	 * @return image ID
 	 */
-	private void addImage(Bitmap image) {
+	private long addImage(Bitmap image) {
 		// Converting the byte array to a string safe for the DB
 		byte[] imgBytes = ImageHandler.bitmapToBytes(image);
 
@@ -320,11 +323,13 @@ public class PhotoViewActivity extends AppCompatActivity {
 						DatabaseHandler.UserPhotos.TABLE, null, userImageData);
 
 				setFragment();
+				return imageId;
 			} catch (SQLException exception) {
 				Toast.makeText(this, "There was an error when writing to the database.",
 						Toast.LENGTH_LONG).show();
 				Log.e(TAG, exception.toString());
 			}
 		}
+		return 0;
 	}
 }

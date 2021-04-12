@@ -3,6 +3,7 @@ package bwlodarski.photoMap.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -39,6 +40,7 @@ public class PhotoGridFragment extends Fragment {
 	private RecyclerView recyclerView;
 	private TextView hintText;
 	private int userId;
+	PhotoDetailsFragment details;
 
 	// Default constructor
 	public PhotoGridFragment() {
@@ -56,7 +58,15 @@ public class PhotoGridFragment extends Fragment {
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.fragment_photo_grid, container, false);
+
+		View view;
+		int orientation = getResources().getConfiguration().orientation;
+		if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+			view = inflater.inflate(R.layout.fragment_photo_grid, container, false);
+		} else {
+			view = inflater.inflate(R.layout.fragment_photo_multi_view, container, false);
+			details = (PhotoDetailsFragment) getChildFragmentManager().findFragmentById(R.id.detail_fragment);
+		}
 		recyclerView = view.findViewById(R.id.photo_grid);
 		hintText = view.findViewById(R.id.hint_text);
 		fillGrid();
@@ -127,40 +137,12 @@ public class PhotoGridFragment extends Fragment {
 			hintText.setVisibility(View.VISIBLE);
 		} else {
 			// Otherwise, fill the photo adapter and set the recycler view adapter
-			adapter = new PhotoAdapter(getContext(), photos, db, handler);
+			if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+				adapter = new PhotoAdapter(getActivity(), photos, db, handler);
+			} else {
+				adapter = new PhotoAdapter(getActivity(), photos, db, handler, details);
+			}
 			recyclerView.setAdapter(adapter);
 		}
-//
-//		String[] cols = {DatabaseHandler.Photos.KEY, DatabaseHandler.Photos.PHOTO};
-//
-//
-//		// Reading data from the database
-//		//		int idCol, photoCol;
-////		int id;
-////		String photo;
-//		// Loading photos from the database
-//		try (Cursor cursor = db.query(DatabaseHandler.Photos.TABLE, cols,
-//				null, null, null, null, null)) {
-//			while (cursor.moveToNext()) {
-//				int idCol = cursor.getColumnIndexOrThrow(DatabaseHandler.Photos.KEY);
-//				int photoCol = cursor.getColumnIndexOrThrow(DatabaseHandler.Photos.PHOTO);
-//
-//				int id = cursor.getInt(idCol);
-//				String photo = cursor.getString(photoCol);
-//
-//				photos.add(new Photo(id, photo));
-//			}
-//		} catch (SQLException exception) {
-//			Toast.makeText(getContext(), "There was an error when loading photos.",
-//					Toast.LENGTH_LONG).show();
-//			Log.e(TAG, exception.toString());
-//		}
-//		// If there are no photos, disable the recycler view
-//		if (photos.size() == 0) recyclerView.setVisibility(View.GONE);
-//		else {
-//			// Otherwise, fill the photo adapter and set the recycler view adapter
-//			adapter = new PhotoAdapter(getContext(), photos, db, handler);
-//			recyclerView.setAdapter(adapter);
-//		}
 	}
 }

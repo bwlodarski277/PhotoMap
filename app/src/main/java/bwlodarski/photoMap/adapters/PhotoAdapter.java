@@ -3,6 +3,8 @@ package bwlodarski.photoMap.adapters;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 
 import bwlodarski.photoMap.R;
 import bwlodarski.photoMap.activities.PhotoDetailsActivity;
+import bwlodarski.photoMap.fragments.PhotoDetailsFragment;
 import bwlodarski.photoMap.helpers.DatabaseHandler;
 import bwlodarski.photoMap.helpers.ImageHandler;
 import bwlodarski.photoMap.models.Photo;
@@ -30,11 +33,15 @@ import bwlodarski.photoMap.models.Photo;
 public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> {
 
 	private static final String TAG = "PhotoAdapter";
-
+	PhotoDetailsFragment photoDetailsFragment;
+	View view;
 	Context context;
 	ArrayList<Photo> photos;
 	SQLiteDatabase db;
 	DatabaseHandler handler;
+	Resources resources;
+	ViewGroup parent;
+	RecyclerView recyclerView;
 
 	/**
 	 * PhotoAdapter (custom RecyclerView) constructor
@@ -52,6 +59,16 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
 		this.handler = handler;
 	}
 
+	public PhotoAdapter(Context context, ArrayList<Photo> photos,
+	                    SQLiteDatabase db, DatabaseHandler handler,
+						PhotoDetailsFragment fragment) {
+		this.context = context;
+		this.photos = photos;
+		this.db = db;
+		this.handler = handler;
+		this.photoDetailsFragment = fragment;
+	}
+
 	/**
 	 * Inflates the layout with the grid photo fragment.
 	 *
@@ -62,9 +79,18 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
 	@NonNull
 	@Override
 	public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-		View v = LayoutInflater.from(context).inflate(R.layout.fragment_grid_photo,
+		view = LayoutInflater.from(context).inflate(R.layout.fragment_grid_photo,
 				parent, false);
-		return new ViewHolder(v);
+		this.parent = parent;
+		ViewHolder holder = new ViewHolder(view);
+		resources = holder.itemView.getContext().getResources();
+		return holder;
+	}
+
+	@Override
+	public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+		super.onAttachedToRecyclerView(recyclerView);
+		this.recyclerView = recyclerView;
 	}
 
 	/**
@@ -79,9 +105,14 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
 		holder.image.setImageBitmap(ImageHandler.bytesToBitmap(photos.get(position).getImage()));
 		// Pressing the image once will open a full-screen view of the photo.
 		holder.image.setOnClickListener(v -> {
-			Intent intent = new Intent(context, PhotoDetailsActivity.class);
-			intent.putExtra("photo", photos.get(position).getId());
-			context.startActivity(intent);
+			int orientation = resources.getConfiguration().orientation;
+			if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+				Intent intent = new Intent(context, PhotoDetailsActivity.class);
+				intent.putExtra("photo", photos.get(position).getId());
+				context.startActivity(intent);
+			} else {
+				photoDetailsFragment.setDetails(photos.get(position).getId());
+			}
 		});
 		// Pressing and holding on a photo will allow you to delete it.
 		holder.image.setOnLongClickListener(v -> {

@@ -4,6 +4,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
 
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,12 +47,18 @@ public final class ImageHandler {
 	public static byte[] bitmapToBytes(Bitmap imageBitmap) {
 		// Converting the Bitmap image to a byte array
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+		imageBitmap.compress(Bitmap.CompressFormat.PNG, 90, outputStream);
 		return outputStream.toByteArray();
 	}
 
 	public static Bitmap bytesToBitmap(byte[] imageBytes) {
 		return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+	}
+
+	public static BitmapDescriptor bytesToBitmapDescriptor(byte[] imageBytes) {
+		Bitmap image = bytesToBitmap(imageBytes);
+		image = Bitmap.createScaledBitmap(image,100,100, false);
+		return BitmapDescriptorFactory.fromBitmap(image);
 	}
 
 	public static FileReturn readFromFile(String path) throws IOException {

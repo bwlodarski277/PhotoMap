@@ -82,8 +82,7 @@ public class RegisterActivity extends AppCompatActivity {
 						assert firebaseUser != null;
 						firebaseUser.sendEmailVerification();
 
-						Intent login = new Intent(
-								getApplicationContext(), LoginActivity.class);
+						Intent login = new Intent(getApplicationContext(), LoginActivity.class);
 						login.putExtra("EMAIL", email);
 						login.putExtra("PASS", password);
 

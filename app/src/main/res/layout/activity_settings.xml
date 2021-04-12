@@ -23,6 +23,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:textSize="@dimen/regular_text_size"
             android:text="@string/grid_size" />
 
         <SeekBar
@@ -61,13 +62,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:textSize="@dimen/regular_text_size"
             android:text="@string/logged_in_as" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/settings_logout"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
+            android:textSize="@dimen/regular_text_size"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="@string/log_out"
             app:icon="@drawable/logout" />
     </LinearLayout>
@@ -76,6 +78,8 @@
         android:id="@+id/settings_delete_acc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textSize="@dimen/regular_text_size"
+        android:backgroundTint="@color/delete"
         android:text="@string/delete_account"
         app:icon="@drawable/delete" />
 </LinearLayout>

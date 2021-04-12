@@ -61,6 +61,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:textSize="@dimen/regular_text_size"
                 android:text="@string/update_address"
                 app:icon="@drawable/done" />
 
@@ -70,6 +71,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:textSize="@dimen/regular_text_size"
                 android:text="@string/get_location"
                 app:icon="@drawable/gps" />
 
@@ -81,12 +83,15 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginBottom="@dimen/general_padding"
+            android:textSize="@dimen/regular_text_size"
             android:text="@string/sample_lon_lat"
             android:textAlignment="center" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/set_location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textSize="@dimen/regular_text_size"
             android:text="@string/set_location" />
 
     </LinearLayout>

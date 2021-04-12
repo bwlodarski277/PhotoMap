@@ -39,6 +39,7 @@
             android:layout_margin="@dimen/fab_margin"
             android:contentDescription="@string/add_a_photo"
             app:srcCompat="@drawable/add_photo_filled"
+            app:fabSize="auto"
             app:tint="@color/detail" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

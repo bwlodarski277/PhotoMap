@@ -1,34 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:baselineAligned="false"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    tools:context=".activities.PhotoViewActivity">
 
-    <!--    <include-->
-    <!--        layout="@layout/fragment_photo_grid"-->
-    <!--        android:layout_width="0dp"-->
-    <!--        android:layout_height="match_parent"-->
-    <!--        android:layout_weight="1" />-->
-
-    <!--    <include-->
-    <!--        layout="@layout/fragment_photo_details"-->
-    <!--        android:layout_width="0dp"-->
-    <!--        android:layout_height="match_parent"-->
-    <!--        android:layout_weight="2" />-->
-
-    <androidx.fragment.app.FragmentContainerView
+    <include
         android:id="@+id/grid_fragment"
-        android:name="bwlodarski.photoMap.fragments.PhotoGridFragment"
+        layout="@layout/fragment_photo_grid"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1" />
 
-    <androidx.fragment.app.FragmentContainerView
+    <fragment
         android:id="@+id/detail_fragment"
         android:name="bwlodarski.photoMap.fragments.PhotoDetailsFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="2" />
+        android:layout_weight="2"
+        tools:ignore="FragmentTagUsage" />
 
 </LinearLayout>

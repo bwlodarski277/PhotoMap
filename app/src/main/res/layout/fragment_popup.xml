@@ -31,6 +31,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:paddingBottom="@dimen/general_padding"
+                android:textSize="@dimen/header_text_size"
                 android:text="@string/add_a_photo_title"
                 android:textAlignment="center"
                 android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large" />
@@ -44,6 +45,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:onClick="takePicture"
+                    android:textSize="@dimen/regular_text_size"
                     android:text="@string/take_a_photo"
                     app:icon="@drawable/camera" />
 
@@ -71,6 +73,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:onClick="selectPicture"
+                    android:textSize="@dimen/regular_text_size"
                     android:text="@string/select_photo_from_device"
                     app:icon="@drawable/select_photo" />
             </LinearLayout>

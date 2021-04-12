@@ -4,11 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activities.PhotoDetailsActivity">
+    tools:context=".activities.PhotoDetailsActivity">
 
-    <include
-        layout="@layout/fragment_photo_details"
+    <fragment
+        android:id="@+id/detail_fragment"
+        android:name="bwlodarski.photoMap.fragments.PhotoDetailsFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        tools:ignore="FragmentTagUsage" />
 
 </FrameLayout>

@@ -12,6 +12,7 @@
         android:layout_gravity="center"
         android:paddingTop="@dimen/general_padding"
         android:text="@string/add_hint"
+        android:textSize="@dimen/regular_text_size"
         android:textAlignment="center"
         android:visibility="gone" />
 

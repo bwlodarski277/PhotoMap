@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.PhotoMap.FadeInOut" parent="Theme.PhotoMap.NoActionBar">
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="android:windowEnterAnimation">@anim/anim_popup_fade_in</item>
+        <item name="android:windowExitAnimation">@anim/anim_popup_fade_out</item>
+    </style>
+</resources>

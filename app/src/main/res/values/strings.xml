@@ -1,6 +1,7 @@
 <resources>
-    <string name="app_name">Coursework Application</string>
+    <string name="app_name">PhotoMap</string>
     <string name="username_label">Username</string>
+    <string name="email_label">Email</string>
     <string name="password_label">Password</string>
     <string name="username_hint">username</string>
     <string name="password_hint">password</string>
@@ -20,4 +21,34 @@
     <string name="photo_desc">Photo</string>
     <string name="photo">Photo</string>
     <string name="add_hint">Press ➕ to add photos.</string>
+    <string name="select_photo_from_device">Select photo from device</string>
+    <string name="requires_storage_permission">Requires storage permission.</string>
+    <string name="requires_camera_permission">Requires camera permission.</string>
+    <string name="take_a_photo">Take a photo</string>
+    <string name="add_a_photo_title">Add a Photo…</string>
+    <string name="app_logo">App logo</string>
+    <string name="splash_app_name">@string/app_name</string>
+    <string name="view_map">View map</string>
+    <string name="settings">Settings</string>
+    <string name="about_app">About app</string>
+    <string name="view_grid">View grid</string>
+    <string name="title_activity_photo_map">Map</string>
+    <string name="logged_in_as">Logged in as</string>
+    <string name="log_out">Log out</string>
+    <string name="delete_account">delete account</string>
+    <string name="grid_size">Grid size</string>
+    <string name="account">Account</string>
+    <string name="grid">Grid</string>
+    <string name="email_address">email address</string>
+    <string name="register">Register</string>
+    <string name="reset_password">Reset password</string>
+    <string name="title_activity_location_selection">Map</string>
+    <string name="select_location">Select location</string>
+    <string name="set_location">Set location</string>
+    <string name="sample_lon_lat">0.00, 0.00</string>
+    <string name="update_address">update address</string>
+    <string name="get_location">get location</string>
+    <string name="address">Address</string>
+    <string name="address_hint">address</string>
+    <string name="fingerprint_lock">Fingerprint lock</string>
 </resources>

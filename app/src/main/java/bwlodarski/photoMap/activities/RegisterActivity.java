@@ -24,6 +24,10 @@ import bwlodarski.photoMap.helpers.DatabaseHandler;
 import static bwlodarski.photoMap.activities.LoginActivity.minPassLength;
 import static bwlodarski.photoMap.activities.LoginActivity.minUserLength;
 
+/**
+ * Registration activity
+ * Used to register a user into the DB and Firebase.
+ */
 public class RegisterActivity extends AppCompatActivity {
 
 	private static final String TAG = "RegisterActivity";
@@ -39,10 +43,30 @@ public class RegisterActivity extends AppCompatActivity {
 		emailEditText = findViewById(R.id.email);
 		passwordEditText = findViewById(R.id.password);
 
+		// Setting up Firebase
 		auth = FirebaseAuth.getInstance();
 
 		Intent login = getIntent();
 		emailEditText.setText(login.getStringExtra("EMAIL"));
+	}
+
+	/**
+	 * Checks whether an email and password are strong enough.
+	 *
+	 * @param email    email address to check
+	 * @param password password to check
+	 * @return integer, indicating whether the email and password are strong enough
+	 */
+	public static int checkEmailAndPassword(String email, String password) {
+		// Checking the email and password length
+		if (email.length() < minUserLength) {
+			return -1; // Indicating email is too short
+		}
+
+		if (password.length() < minPassLength) {
+			return -2; // Indicating password is too short
+		}
+		return 0; // Indicating both are fine
 	}
 
 	/**
@@ -57,14 +81,15 @@ public class RegisterActivity extends AppCompatActivity {
 
 		Context context = getApplicationContext();
 
+		int result = checkEmailAndPassword(email, password);
 		// Checking the email and password length
-		if (email.length() < minUserLength) {
+		if (result == -1) {
 			String msg = String.format("Username needs to be at least %s long.", minUserLength);
 			Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
 			return;
 		}
 
-		if (password.length() < minPassLength) {
+		if (result == -2) {
 			String msg = String.format("Password needs to be at least %s long.", minPassLength);
 			Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
 			return;
@@ -78,6 +103,7 @@ public class RegisterActivity extends AppCompatActivity {
 						// Adding the user to the local DB
 						addUserToDB(user, email);
 
+						// Sending an email verification email
 						FirebaseUser firebaseUser = auth.getCurrentUser();
 						assert firebaseUser != null;
 						firebaseUser.sendEmailVerification();
@@ -90,6 +116,7 @@ public class RegisterActivity extends AppCompatActivity {
 								"Please verify your email, check your inbox.",
 								Toast.LENGTH_SHORT).show();
 
+						// Returning to the login activity
 						setResult(Activity.RESULT_OK, login);
 						finish();
 					} else {

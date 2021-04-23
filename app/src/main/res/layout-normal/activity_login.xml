@@ -30,9 +30,7 @@
             android:layout_weight="1"
             android:gravity="center_vertical"
             android:paddingStart="0dp"
-            android:paddingLeft="0dp"
             android:paddingEnd="@dimen/general_padding"
-            android:paddingRight="@dimen/general_padding"
             android:text="@string/email_label"
             android:textSize="@dimen/regular_text_size" />
 
@@ -60,9 +58,7 @@
             android:layout_weight="1"
             android:gravity="center_vertical"
             android:paddingStart="0dp"
-            android:paddingLeft="0dp"
             android:paddingEnd="@dimen/general_padding"
-            android:paddingRight="@dimen/general_padding"
             android:text="@string/password_label"
             android:textSize="@dimen/regular_text_size" />
 
@@ -103,7 +99,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/general_padding"
-            android:layout_marginRight="@dimen/general_padding"
             android:layout_weight="1"
             android:onClick="register"
             android:text="@string/register_text"

@@ -33,6 +33,10 @@ import bwlodarski.photoMap.helpers.DatabaseHandler;
 import bwlodarski.photoMap.helpers.ImageHandler;
 import bwlodarski.photoMap.models.UserPrefs;
 
+/**
+ * Photo Map Activity
+ * Used for displaying a map of a user's photos.
+ */
 public class PhotoMapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
 	private static final String TAG = "PhotoMapActivity";
@@ -40,12 +44,33 @@ public class PhotoMapActivity extends AppCompatActivity implements OnMapReadyCal
 	private String username;
 	private int userId;
 
+	/**
+	 * Checks a marker's ID against a list of pairs of markers and their IDs.
+	 *
+	 * @param markers list of markers and their IDs
+	 * @param marker  marker to look for
+	 * @return the ID of the marker that is being looked for
+	 */
+	public static int checkMarkerId(List<Pair<Marker, Integer>> markers, Marker marker) {
+		for (Pair<Marker, Integer> m : markers) {
+			if (m.first != null && m.second != null) {
+				Marker current = m.first;
+				int id = m.second;
+				if (current.equals(marker)) {
+					return id;
+				}
+			}
+		}
+		return -1; // Indicating that the marker ID was not found
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_photo_map);
 		Toolbar toolbar = findViewById(R.id.toolbar);
 
+		// Getting username and ID so we can fetch the user's photos from the DB
 		Intent intent = getIntent();
 		username = intent.getStringExtra(UserPrefs.usernameKey);
 		userId = intent.getIntExtra(UserPrefs.userIdKey, -1);
@@ -79,6 +104,7 @@ public class PhotoMapActivity extends AppCompatActivity implements OnMapReadyCal
 //		googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
 //		googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
+		// SQL query for getting the user's photos
 		String getPhotos = String.format(
 				"SELECT * FROM %s WHERE %s IN (SELECT a.%s FROM %s AS a JOIN %s AS b ON a.%s = b.%s WHERE b.%s = ?)",
 				DatabaseHandler.Photos.TABLE, DatabaseHandler.Photos.KEY,
@@ -90,6 +116,7 @@ public class PhotoMapActivity extends AppCompatActivity implements OnMapReadyCal
 
 		List<Pair<Marker, Integer>> markers = new ArrayList<>();
 
+		// Fetching a list of the current user's photos so we can display them on the map
 		LatLng last = null;
 		try (Cursor cursor = db.rawQuery(getPhotos, whereArgs)) {
 			if (cursor.moveToFirst()) {
@@ -101,8 +128,12 @@ public class PhotoMapActivity extends AppCompatActivity implements OnMapReadyCal
 
 					int id = cursor.getInt(idCol);
 					String photoPath = cursor.getString(photoCol);
-					long lat = cursor.getLong(latCol);
-					long lon = cursor.getLong(lonCol);
+					float lat = cursor.getFloat(latCol);
+					float lon = cursor.getFloat(lonCol);
+
+					// Making sure photos with no location appear on the map
+					if (lat == 0.0 && lon == 0.0) continue;
+
 					LatLng position = new LatLng(lat, lon);
 
 					ImageHandler.FileReturn data = ImageHandler.readFromFile(photoPath);
@@ -114,6 +145,7 @@ public class PhotoMapActivity extends AppCompatActivity implements OnMapReadyCal
 							.position(position)
 							.icon(ImageHandler.bytesToBitmapDescriptor(photo))
 					);
+					// Storing the marker along with its photo ID so we can later access the ID
 					markers.add(new Pair<>(marker, id));
 
 					last = position;
@@ -129,22 +161,19 @@ public class PhotoMapActivity extends AppCompatActivity implements OnMapReadyCal
 			Log.e(TAG, exception.toString());
 		}
 		if (last != null) {
+			// Moving the camera to the location of the last photo the user added
 			googleMap.moveCamera(CameraUpdateFactory.newLatLng(last));
 		}
 
 		Context context = this;
+		// When a photo on the map is clicked, take the user to the detail view.
 		googleMap.setOnMarkerClickListener(marker -> {
-			for (Pair<Marker, Integer> m : markers) {
-				if (m.first != null && m.second != null) {
-					Marker current = m.first;
-					int id = m.second;
-					if (current.equals(marker)) {
-						Intent photoDetails = new Intent(context, PhotoDetailsActivity.class);
-						photoDetails.putExtra("photo", id);
-						startActivity(photoDetails);
-						return true;
-					}
-				}
+			int markerId = checkMarkerId(markers, marker);
+			if (markerId != -1) {
+				Intent photoDetails = new Intent(context, PhotoDetailsActivity.class);
+				photoDetails.putExtra("photo", markerId);
+				startActivity(photoDetails);
+				return true;
 			}
 			return false;
 		});
@@ -160,12 +189,14 @@ public class PhotoMapActivity extends AppCompatActivity implements OnMapReadyCal
 	public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 		int itemId = item.getItemId();
 		if (itemId == R.id.menu_grid_button) {
+			// When the user clicks the grid icon, take them to the photo grid activity
 			Intent photoViewIntent = new Intent(this, PhotoViewActivity.class);
 			photoViewIntent.putExtra(UserPrefs.usernameKey, username);
 			photoViewIntent.putExtra(UserPrefs.userIdKey, userId);
 			startActivity(photoViewIntent);
 			finish();
 		} else if (itemId == R.id.menu_settings) {
+			// If the user clicks the settings button, take them to the application settings
 			Intent settingsIntent = new Intent(this, SettingsActivity.class);
 			startActivity(settingsIntent);
 		} else {

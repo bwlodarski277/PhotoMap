@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.autofill.HintConstants;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -42,6 +41,25 @@ public class LoginActivity extends AppCompatActivity {
 	private SharedPreferences preferences;
 	private FirebaseAuth auth;
 
+	/**
+	 * Checks whether an email and password are strong enough.
+	 *
+	 * @param email    email address to check
+	 * @param password password to check
+	 * @return integer, indicating whether the email and password are strong enough
+	 */
+	public static int checkEmailAndPassword(String email, String password) {
+		// Checking the email and password length
+		if (email.length() < minUserLength) {
+			return -1; // Indicating that the email is too short
+		}
+
+		if (password.length() < minPassLength) {
+			return -2; // Indicating that the password is too short
+		}
+		return 0; // Indicating that both fields are OK
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -54,10 +72,10 @@ public class LoginActivity extends AppCompatActivity {
 		preferences = getSharedPreferences(UserPrefs.userPrefFile, MODE_PRIVATE);
 
 		// If the user is logged in, skip the login screen.
-		if (preferences.contains(UserPrefs.userIdKey) &&
-				preferences.contains(UserPrefs.usernameKey)) {
-			sendToPhotoView();
-		}
+//		if (preferences.contains(UserPrefs.userIdKey) &&
+//				preferences.contains(UserPrefs.usernameKey)) {
+//			sendToPhotoView();
+//		}
 
 		FirebaseApp.initializeApp(this);
 		auth = FirebaseAuth.getInstance();
@@ -91,7 +109,7 @@ public class LoginActivity extends AppCompatActivity {
 	 */
 	public void register(View view) {
 		String email = emailEditText.getText().toString();
-
+		// Go to the registration screen and wait for a result
 		Intent registerIntent = new Intent(view.getContext(), RegisterActivity.class);
 		registerIntent.putExtra("EMAIL", email);
 		startActivityForResult(registerIntent, REGISTER);
@@ -103,6 +121,7 @@ public class LoginActivity extends AppCompatActivity {
 		if (resultCode == Activity.RESULT_OK) {
 			if (requestCode == REGISTER) {
 				assert data != null;
+				// Once user is registered, fill the fields in the login form
 				emailEditText.setText(data.getStringExtra("EMAIL"));
 				passwordEditText.setText(data.getStringExtra("PASS"));
 			} else {
@@ -123,15 +142,12 @@ public class LoginActivity extends AppCompatActivity {
 		String password = passwordEditText.getText().toString();
 
 		Context context = getApplicationContext();
-
-		// Checking the email and password length
-		if (email.length() < minUserLength) {
+		int result = checkEmailAndPassword(email, password);
+		if (result == -1) {
 			String msg = String.format("Username needs to be at least %s long.", minUserLength);
 			Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
 			return;
-		}
-
-		if (password.length() < minPassLength) {
+		} else if (result == -2) {
 			String msg = String.format("Password needs to be at least %s long.", minPassLength);
 			Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
 			return;
@@ -162,7 +178,12 @@ public class LoginActivity extends AppCompatActivity {
 				});
 	}
 
-	private void getUserData(String email) {
+	/**
+	 * Gets user data based on the user's email address.
+	 *
+	 * @param email email address to get user data from.
+	 */
+	public void getUserData(String email) {
 		DatabaseHandler handler = new DatabaseHandler(this);
 		SQLiteDatabase db = handler.getWritableDatabase();
 
@@ -205,15 +226,22 @@ public class LoginActivity extends AppCompatActivity {
 		}
 	}
 
+	/**
+	 * Sends a reset password email using Firebase.
+	 *
+	 * @param view view that called this method
+	 */
 	public void resetPassword(View view) {
 		String email = emailEditText.getText().toString();
 		auth.sendPasswordResetEmail(email)
 				.addOnCompleteListener(task -> {
+					// If email reset is successfully sent, make toast
 					if (task.isSuccessful()) {
 						Toast.makeText(getApplicationContext(),
 								"A password reset link has been sent to your email.",
 								Toast.LENGTH_LONG).show();
 					} else {
+						// If the email is not sent (i.e. the email is wrong)
 						Toast.makeText(getApplicationContext(),
 								"Could not send password reset email. " +
 										"Double-check your email address.",

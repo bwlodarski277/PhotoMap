@@ -1,16 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/big_photo"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:adjustViewBounds="true"
-        android:contentDescription="@string/photo"
-        android:scaleType="fitCenter" />
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/big_photo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/photo"
+            android:scaleType="fitCenter" />
+
+        <LinearLayout
+            android:id="@+id/photo_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/general_padding">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/general_padding"
+                android:drawablePadding="@dimen/general_padding"
+                android:gravity="center_vertical"
+                android:text="@string/location"
+                android:textSize="@dimen/regular_text_size"
+                app:drawableStartCompat="@drawable/gps" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/temperature"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/general_padding"
+                android:drawablePadding="@dimen/general_padding"
+                android:gravity="center_vertical"
+                android:text="@string/temperature_placeholder"
+                android:textSize="@dimen/regular_text_size"
+                app:drawableStartCompat="@drawable/temperature" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/light"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/general_padding"
+                android:drawablePadding="@dimen/general_padding"
+                android:gravity="center_vertical"
+                android:text="@string/light"
+                android:textSize="@dimen/regular_text_size"
+                app:drawableStartCompat="@drawable/light" />
+        </LinearLayout>
 
 
-</FrameLayout>
+    </LinearLayout>
+</ScrollView>

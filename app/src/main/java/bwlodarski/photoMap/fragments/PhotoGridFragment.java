@@ -22,7 +22,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Objects;
 
 import bwlodarski.photoMap.R;
 import bwlodarski.photoMap.adapters.PhotoAdapter;
@@ -60,10 +59,14 @@ public class PhotoGridFragment extends Fragment {
 	                         Bundle savedInstanceState) {
 
 		View view;
+		// Determining what to do based on the orientation.
 		int orientation = getResources().getConfiguration().orientation;
+		// If portrait, we will start a new activity to display photo details
 		if (orientation == Configuration.ORIENTATION_PORTRAIT) {
 			view = inflater.inflate(R.layout.fragment_photo_grid, container, false);
 		} else {
+			// If landscape, the photo details fragment is in the same activity, side by side.
+			// So we will be calling a function in the detail fragment.
 			view = inflater.inflate(R.layout.fragment_photo_multi_view, container, false);
 			details = (PhotoDetailsFragment) getChildFragmentManager().findFragmentById(R.id.detail_fragment);
 		}
@@ -84,9 +87,6 @@ public class PhotoGridFragment extends Fragment {
 				.getSharedPreferences(SettingsPrefs.settingsPrefFile, Context.MODE_PRIVATE);
 		int columns = settings.getInt("COLS", 3);
 
-//		// Changing the number of columns depending on the orientation
-//		if (orientation == Configuration.ORIENTATION_PORTRAIT) columns = 3;
-//		else columns = 2;
 		recyclerView.setLayoutManager(new GridLayoutManager(getContext(), columns));
 
 		DatabaseHandler handler = new DatabaseHandler(getContext());
@@ -101,6 +101,7 @@ public class PhotoGridFragment extends Fragment {
 
 		String[] queryParams = {String.valueOf(userId)};
 
+		// Getting all the user's photos
 		try (Cursor cursor = db.rawQuery(rawQuery, queryParams)) {
 			if (cursor.moveToFirst()) {
 				do {
@@ -112,6 +113,7 @@ public class PhotoGridFragment extends Fragment {
 
 					byte[] photo = null;
 					try {
+						// Reading photo from the DB
 						ImageHandler.FileReturn data = ImageHandler.readFromFile(photoPath);
 						if (data.getBytesRead() == -1) Log.e(TAG, "No bytes read from file.");
 
@@ -122,7 +124,7 @@ public class PhotoGridFragment extends Fragment {
 								Toast.LENGTH_LONG).show();
 						Log.e(TAG, exception.toString());
 					}
-
+					// Adding the user's photo to the grid
 					photos.add(new Photo(id, photo, photoPath));
 				} while (cursor.moveToNext());
 			}
@@ -138,8 +140,11 @@ public class PhotoGridFragment extends Fragment {
 		} else {
 			// Otherwise, fill the photo adapter and set the recycler view adapter
 			if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+				// If portrait, start a new activity to view photo details
 				adapter = new PhotoAdapter(getActivity(), photos, db, handler);
 			} else {
+				// If landscape, photo details fragment is in the same activity, so
+				// we want to show the photo details in that.
 				adapter = new PhotoAdapter(getActivity(), photos, db, handler, details);
 			}
 			recyclerView.setAdapter(adapter);

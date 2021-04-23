@@ -31,6 +31,10 @@ import bwlodarski.photoMap.models.Photo;
 import bwlodarski.photoMap.models.SettingsPrefs;
 import bwlodarski.photoMap.models.UserPrefs;
 
+/**
+ * Photo grid fragment
+ * Used for displaying a photo grid.
+ */
 public class PhotoGridFragment extends Fragment {
 
 	private static final String TAG = "PhotoGridFragment";

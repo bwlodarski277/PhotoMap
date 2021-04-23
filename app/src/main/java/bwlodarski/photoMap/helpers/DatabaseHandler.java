@@ -105,7 +105,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		/**
 		 * User table creation SQL.
 		 */
-		private static final String CREATE_USERS =
+		public static final String CREATE_USERS =
 				String.format(
 						"CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
 								"%s TEXT UNIQUE NOT NULL, %s TEXT NOT NULL);",
@@ -140,13 +140,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		public static final String LON = "lon";
 
 		/**
+		 * Temperature reading when the photo was taken
+		 */
+		public static final String TEMP = "temp";
+
+		/**
+		 * Ambient light reading when the photo was taken
+		 */
+		public static final String LIGHT = "light";
+
+		/**
 		 * Photo table creation SQL.
 		 */
-		private static final String CREATE_PHOTOS =
+		public static final String CREATE_PHOTOS =
 				String.format(
 						"CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
-								"%s BLOB, %s REAL, %s REAL);",
-						TABLE, KEY, PHOTO, LAT, LON);
+								"%s BLOB, %s REAL, %s FLOAT, %s FLOAT, %s FLOAT);",
+						TABLE, KEY, PHOTO, LAT, LON, TEMP, LIGHT);
 	}
 
 	/**
@@ -169,7 +179,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		/**
 		 * UserPhoto table creation SQL.
 		 */
-		private static final String CREATE_LINK =
+		public static final String CREATE_LINK =
 				String.format("CREATE TABLE %s (%s INT NOT NULL, %s INT NOT NULL,FOREIGN KEY (%s) " +
 								"REFERENCES users(%s), FOREIGN KEY (%s) REFERENCES photos(%s), " +
 								"PRIMARY KEY (%s, %s));",

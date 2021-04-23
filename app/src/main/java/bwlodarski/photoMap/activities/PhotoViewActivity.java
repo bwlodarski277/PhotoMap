@@ -50,6 +50,10 @@ import bwlodarski.photoMap.helpers.DatabaseHandler;
 import bwlodarski.photoMap.helpers.ImageHandler;
 import bwlodarski.photoMap.models.UserPrefs;
 
+/**
+ * Photo view activity
+ * Used display the photo grid (and photo details if in landscape)
+ */
 public class PhotoViewActivity extends AppCompatActivity {
 
 	private static final int CAMERA_PERMISSION = 22;
@@ -77,6 +81,7 @@ public class PhotoViewActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_photo_view);
 		Toolbar toolbar = findViewById(R.id.toolbar);
 
+		// Getting firebase authentication
 		FirebaseAuth auth = FirebaseAuth.getInstance();
 		user = auth.getCurrentUser();
 
@@ -87,6 +92,7 @@ public class PhotoViewActivity extends AppCompatActivity {
 		toolbar.setSubtitle("All photos");
 		setSupportActionBar(toolbar);
 
+		// Getting the user ID from the login activity
 		userId = intent.getIntExtra(UserPrefs.userIdKey, 0);
 
 		DatabaseHandler handler = new DatabaseHandler(this);
@@ -96,6 +102,8 @@ public class PhotoViewActivity extends AppCompatActivity {
 
 		FloatingActionButton fab = findViewById(R.id.add_photo);
 
+		// When the user clicks the fab in the bottom right, display a popup window that
+		// lets the user choose whether they want to take a photo or select one from their device.
 		fab.setOnClickListener(view -> {
 			View root = findViewById(R.id.photo_view_root).getRootView();
 
@@ -105,18 +113,29 @@ public class PhotoViewActivity extends AppCompatActivity {
 					ActionBar.LayoutParams.MATCH_PARENT,
 					ActionBar.LayoutParams.MATCH_PARENT, true);
 
+			// Setting popup animation so that the popup fades in and out
 			addPhotoPopup.setAnimationStyle(R.style.popup_fade_anim);
 
+			// Displaying the popup
 			addPhotoPopup.showAtLocation(findViewById(R.id.photo_view_root), Gravity.CENTER,
 					ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
 		});
 	}
 
+	/**
+	 * Closes the popup
+	 * @param view view that called this function
+	 */
 	public void leavePopup(View view) {
 		addPhotoPopup.dismiss();
 	}
 
+	/**
+	 * Requests the camera permission and takes a photo if it is granted
+	 * @param view view that called this function
+	 */
 	public void takePicture(View view) {
+		// Checking permission
 		int permission = ContextCompat.checkSelfPermission(
 				view.getContext(), Manifest.permission.CAMERA);
 
@@ -125,18 +144,29 @@ public class PhotoViewActivity extends AppCompatActivity {
 		} else {
 			requestCameraPerm();
 		}
+		// Close popup once user clicks something
 		addPhotoPopup.dismiss();
 	}
 
+	/**
+	 * Takes a picture by starting a camera intent
+	 */
 	private void _takePicture() {
 		Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		startActivityForResult(cameraIntent, TAKE_PICTURE);
 	}
 
+	/**
+	 * Selects a picture from the gallery to add to the photo grid.
+	 * @param view view that called this function
+	 */
 	public void selectPicture(View view) {
 		_selectPicture();
 	}
 
+	/**
+	 * Starts the storage intent to select a photo from the gallery
+	 */
 	private void _selectPicture() {
 		Intent storageIntent = new Intent(Intent.ACTION_PICK,
 				android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -144,20 +174,20 @@ public class PhotoViewActivity extends AppCompatActivity {
 				Intent.createChooser(storageIntent, "Select photo to add"), SELECT_PICTURE);
 	}
 
+	/**
+	 * Placing the photo grid fragment in the view
+	 */
 	private void setFragment() {
-//		Fragment photoViewFragment;
 		Fragment photoViewFragment = new PhotoGridFragment();
-//		int orientation = getResources().getConfiguration().orientation;
-//		if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-//			photoViewFragment = new PhotoGridFragment();
-//		} else {
-//			photoViewFragment = new PhotoMultiViewFragment();
-//		}
 		// Replacing `photo_view` with the photo grid fragment
 		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.photo_view, photoViewFragment).commit();
 	}
 
+	/**
+	 * Requests camera permission.
+	 * Once granted, the result is sent to onRequestPermissionResult
+	 */
 	public void requestCameraPerm() {
 		String[] permissions = {Manifest.permission.CAMERA};
 		ActivityCompat.requestPermissions(this, permissions, CAMERA_PERMISSION);
@@ -181,6 +211,7 @@ public class PhotoViewActivity extends AppCompatActivity {
 						.setAction("Retry", v -> requestCameraPerm()).show();
 			}
 		}
+		// Closing the popup window
 		addPhotoPopup.dismiss();
 	}
 
@@ -194,12 +225,14 @@ public class PhotoViewActivity extends AppCompatActivity {
 	public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 		int itemId = item.getItemId();
 		if (itemId == R.id.menu_map_button) {
+			// When the user clicks the photo map icon, take them to the photo map activity
 			Intent photoMapIntent = new Intent(this, PhotoMapActivity.class);
 			photoMapIntent.putExtra(UserPrefs.usernameKey, username);
 			photoMapIntent.putExtra(UserPrefs.userIdKey, userId);
 			startActivity(photoMapIntent);
 			finish();
 		} else if (itemId == R.id.menu_settings) {
+			// When the user clicks the settings icon, take them to the settings activity
 			Intent settingsIntent = new Intent(this, SettingsActivity.class);
 			startActivity(settingsIntent);
 		} else {
@@ -218,28 +251,38 @@ public class PhotoViewActivity extends AppCompatActivity {
 			assert data != null;
 			Intent locationIntent;
 			switch (requestCode) {
+				// When the user decides to take a picture
 				case TAKE_PICTURE:
 					Bitmap photoTaken = (Bitmap) data.getExtras().get("data");
+					// Adding the photo to the database. Later we will
+					// add the location and sensors.
 					long photoId = addImage(photoTaken);
 
 					locationIntent = new Intent(
 							this, LocationSelectionActivity.class);
 					locationIntent.putExtra("ID", photoId);
+					// Once the photo is taken, take user to activity that lets them pick
+					// where the photo was taken
 					startActivityForResult(locationIntent, GET_LOCATION);
 
 					break;
+				// When the user decides to select a picture from their device
 				case SELECT_PICTURE:
-
 					Uri imageUri = data.getData();
 					InputStream stream;
 					try {
+						// Reading the selected photo from the storage
 						stream = getContentResolver().openInputStream(imageUri);
 						Bitmap imageFromGallery = BitmapFactory.decodeStream(stream);
+						// Adding the photo to the database. Later we will
+						// add the location and sensors.
 						long imageId = addImage(imageFromGallery);
 
 						locationIntent = new Intent(
 								this, LocationSelectionActivity.class);
 						locationIntent.putExtra("ID", imageId);
+						// Once the photo is taken, take user to activity that lets them pick
+						// where the photo was taken
 						startActivityForResult(locationIntent, GET_LOCATION);
 
 					} catch (FileNotFoundException exception) {
@@ -249,22 +292,38 @@ public class PhotoViewActivity extends AppCompatActivity {
 						Log.e(TAG, exception.toString());
 					}
 					break;
+				// When the user returns from the screen which lets them select the photo location
 				case GET_LOCATION:
 					Bundle bundle = data.getBundleExtra("LatLng");
 					LatLng newLoc = bundle.getParcelable("LatLng");
 					long photo = data.getLongExtra("ID", -1);
-					setPhotoLoc(photo, newLoc);
+					float temperature = data.getFloatExtra("TEMP", 0);
+					float light = data.getFloatExtra("LIGHT", 0);
+					// Adding the new photo along with its location and sensor readings to DB
+					setPhotoData(photo, newLoc, temperature, light);
 			}
 		}
 	}
 
-	private void setPhotoLoc(long photoId, LatLng loc) {
+	/**
+	 * Assigns extra data to a photo row in the database.
+	 * @param photoId ID of photo row to modify
+	 * @param loc location to set
+	 * @param temperature temperature to set
+	 * @param light light level to set
+	 */
+	private void setPhotoData(long photoId, LatLng loc, float temperature, float light) {
 		String where = String.format("%s = ?", DatabaseHandler.Photos.KEY);
 		String[] whereArgs = {String.valueOf(photoId)};
+
 		ContentValues contentValues = new ContentValues();
-		contentValues.put(DatabaseHandler.Photos.LAT, loc.latitude);
-		contentValues.put(DatabaseHandler.Photos.LON, loc.longitude);
+		contentValues.put(DatabaseHandler.Photos.LAT, (float) loc.latitude);
+		contentValues.put(DatabaseHandler.Photos.LON, (float) loc.longitude);
+		contentValues.put(DatabaseHandler.Photos.TEMP, temperature);
+		contentValues.put(DatabaseHandler.Photos.LIGHT, light);
+
 		try {
+			// Inserting the values to the row of the photo that was just taken
 			db.update(DatabaseHandler.Photos.TABLE, contentValues, where, whereArgs);
 		} catch (SQLException exception) {
 			Log.e(TAG, exception.toString());

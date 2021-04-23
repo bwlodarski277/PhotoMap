@@ -9,6 +9,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import bwlodarski.photoMap.R;
 
+/**
+ * Splash screen activity
+ * Displays a logo and a spinner for a second before starting a login intent.
+ */
 public class SplashScreenActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {

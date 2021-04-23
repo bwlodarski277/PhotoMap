@@ -51,4 +51,8 @@
     <string name="address">Address</string>
     <string name="address_hint">address</string>
     <string name="fingerprint_lock">Fingerprint lock</string>
+    <string name="location">location</string>
+    <string name="address_placeholder">address</string>
+    <string name="temperature_placeholder">temperature</string>
+    <string name="light">light</string>
 </resources>
